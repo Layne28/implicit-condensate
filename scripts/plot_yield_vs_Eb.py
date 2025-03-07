@@ -5,7 +5,7 @@ import numpy as np
 import sys
 import os
 
-do_near_perfect=1
+do_near_perfect=0
 
 N=1200
 L=144.2

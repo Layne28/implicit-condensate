@@ -30,7 +30,7 @@ if __name__ == "__main__":
         raise
 
     #do a bulk analysis run - tracks number of clusters of each size every jump frames
-    observables = ['num_bodies','bond_counts']
+    observables = ['num_bodies','bonds']
     observer = setup_observer(gsd_file, 'bulk', jump=jump,observables=observables)
     analyze.run_analysis(gsd_file, ixn_file=ixn_file, observer=observer)
 

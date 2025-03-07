@@ -12,7 +12,7 @@ Vrs=(0.005) #(0.005 0.002 0.001)
 Ebs=(6.5) #(0.0 6.0)
 Ecs=(0.0 1.0 3.0 5.0 7.0)
 
-seeds=($(seq 1 $nseed))
+seeds=($(seq 2 $nseed)) #MAKE SURE TO CHANGE THIS BACK TO 1
 
 cmd_list=()
 

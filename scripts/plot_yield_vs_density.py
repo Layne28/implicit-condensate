@@ -5,35 +5,38 @@ import numpy as np
 import sys
 import os
 
+do_near_perfect=0
+
 N=1200
 Ls=[288.5, 228.9, 181.7, 158.7, 144.2, 133.9, 117.0, 106.3]#, 49.3]
 Vr=0.005
-Eb=6.0
+Eb=6.5
 Ecs=[0,1,3,5,7]
 densities = []
 for L in Ls:
     densities.append(N/L**3)
 
 yield_arr=np.zeros((len(Ecs),len(Ls)))
+err_arr=np.zeros((len(Ecs),len(Ls)))
 
 for i in range(len(Ecs)):
     for j in range(len(Ls)):
-        #myfile=os.path.expandvars('$SCRATCH/capsid-assembly/llps/droplet/assembly_trajectories/N=%d/L=%.01f/Vr=%.03f/E_cond=%f/E_bond=%f/yield.txt' % (N, L, Vr, Ecs[i], Ebs[j]))
-        myfile=os.path.expandvars('$SCRATCH/capsid-assembly/llps/droplet/assembly_trajectories/N=%d/L=%.01f/Vr=%.03f/E_cond=%f/E_bond=%f/seed=1/traj.sizes' % (N, Ls[j], Vr, Ecs[i], Eb))
+        if do_near_perfect==1:
+            myfile=os.path.expandvars('$SCRATCH/capsid-assembly/llps/droplet/assembly_trajectories/N=%d/L=%.01f/Vr=%.03f/E_cond=%f/E_bond=%f/yield_near_perfect.txt' % (N, Ls[j], Vr, Ecs[i], Eb))
+        else:
+            myfile=os.path.expandvars('$SCRATCH/capsid-assembly/llps/droplet/assembly_trajectories/N=%d/L=%.01f/Vr=%.03f/E_cond=%f/E_bond=%f/yield.txt' % (N, Ls[j], Vr, Ecs[i], Eb))
         if os.path.exists(myfile):
-            data = np.loadtxt(myfile)
-            #yield_arr[i,j] = data[-1,1]
-
-            if data.shape[1]<14:
-                yield_arr[i,j]=0
-            else:
-                #yield_arr[i,j] = 12*data[-1,12]/(1.0*N) + 11*data[-1,11]/(1.0*N)
-                yield_arr[i,j] = 12*data[-1,12]/(1.0*N)
+            with open(myfile, 'r') as f:
+                firstline = f.readline()
+            nsamples = int(firstline.split(' ')[-1])
+            data = np.loadtxt(myfile,skiprows=1)
+            yield_arr[i,j] = data[-1,1]
+            err_arr[i,j] = data[-1,2]/np.sqrt(nsamples)
 
 
 fig = plt.figure()
 for i in range(len(Ecs)):
-    plt.plot(densities, yield_arr[i,:], label=r'$E_c=%.0f$' % Ecs[i], marker='o')
+    plt.errorbar(densities, yield_arr[i,:], yerr=2*err_arr[i,:], label=r'$E_c=%.0f$' % Ecs[i], marker='o')
 plt.ylim([0.0,1.0])
 plt.ylabel(r'$f_{\text{c}}$')
 plt.xlabel(r'$\rho_{\text{T}}$')
