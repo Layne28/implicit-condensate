@@ -21,23 +21,30 @@ theory_data = np.loadtxt('actual_Kc.dat')
 
 Ecs = [0.0,1.0,3.0,5.0,7.0]
 
-basedir = '$SCRATCH/capsid-assembly/llps/droplet/assembly_trajectories/N=1200/L=144.2/Vr=0.005/short/'
+basedir = '$SCRATCH/capsid-assembly/llps/droplet/assembly_trajectories/N=1200/L=144.2/Vr=0.005/'
 
 Kcs = []
+Kcerrs = []
 
 for Ec in Ecs:
-    myfile = os.path.expandvars(basedir) + 'E_cond=%f/E_bond=0.000000/seed=1/Kc.txt' % Ec
+    myfile = os.path.expandvars(basedir) + 'E_cond=%f/E_bond=0.000000/Kc.txt' % Ec
     with open(myfile, 'r') as f:
-        f.readline() #skip header
+        firstline = f.readline() #skip header
+        nsamples = int((firstline.split('= ')[-1]).split(')')[0])
+        print(nsamples)
         line = f.readline()
+        
 
     elems = line.split(' ')
-    Kc = float(elems[-1])
+    Kc = float(elems[0])
+    Kcstdev = float(elems[1])
     Kcs.append(Kc)
+    Kcerrs.append(Kcstdev/np.sqrt(nsamples))
 
 print(Kcs)
+print(Kcerrs)
 fig = plt.figure()
-plt.plot(np.exp(np.array(Ecs)), np.array(Kcs), marker='o',label='simulation')
+plt.errorbar(np.exp(np.array(Ecs)), np.array(Kcs), yerr=2*np.array(Kcerrs), marker='o',markersize=3,capsize=2,label='simulation')
 #plt.plot(np.exp(np.array(Ecs)),np.exp(np.array(Ecs)), color='black', linestyle='--', label='ideal solution')
 #plt.plot(expEc_arr, rho1c_arr/rho1bg_arr, color='black', linestyle='--', label='Carnahan-Starling')
 plt.plot(theory_data[:,0], theory_data[:,1], color='black', linestyle='--', label='Carnahan-Starling')

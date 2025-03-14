@@ -1,0 +1,10 @@
+Using random seed: 52067
+nsteps: 120000000
+concentration:  0.000999036722964004
+volume: 1201157.0469999998
+no. subunits: 1200
+condensate radius: 11.276138362777196
+Simulation.timestep  Simulation.tps     Time.time    
+      400000          8.29420e+03      2.00000e+03   
+      800000          8.11194e+03      4.00000e+03   
+      1200000         8.05725e+03      6.00000e+03   

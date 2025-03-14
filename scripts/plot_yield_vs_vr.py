@@ -38,6 +38,7 @@ plt.ylim([0.0,1.0])
 plt.ylabel(r'$f_{\text{c}}$')
 plt.xlabel(r'$V_{\text{r}}$')
 plt.legend(bbox_to_anchor=(0.93,1.6),ncol=2)
+plt.xscale('log')
 if do_near_perfect==1:
     plt.savefig('yield_near_perfect_vs_Vr_vary_Ec_N=%d_Eb=%f_L=%f.png' % (N, Eb, L))
 else:

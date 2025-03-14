@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 import numpy.linalg as la
+import os
 
 import AnalysisTools.particle_io as pio
 import AnalysisTools.measurement_tools as tools
@@ -11,20 +12,24 @@ import AnalysisTools.measurement_tools as tools
 myfile = sys.argv[1]
 
 fileparts = myfile.split('/')
-outfile = myfile.replace('traj.gsd', 'Kc.txt')
+outfile = myfile.replace('traj.gsd', 'Kc_traj.txt')
+outfileavg = myfile.replace('traj.gsd', 'Kc.txt')
 
 Vr = [e.split('=')[1] for e in fileparts if e.split('=')[0]=='Vr']
 L = [e.split('=')[1] for e in fileparts if e.split('=')[0]=='L']
 N = [e.split('=')[1] for e in fileparts if e.split('=')[0]=='N']
 Ec = [e.split('=')[1] for e in fileparts if e.split('=')[0]=='E_cond']
+seed = [e.split('=')[1] for e in fileparts if e.split('=')[0]=='seed']
 Vr = float(Vr[0])
 L = float(L[0])
 N = int(N[0])
 Ec = float(Ec[0])
+seed = int(seed[0])
 print(L)
 print(Vr)
 print(N)
 print(Ec)
+print(seed)
 
 Vcond = (L**3)*Vr
 Rcond = (Vcond/(4.0*np.pi/3.0))**(1.0/3)
@@ -32,6 +37,9 @@ print(Rcond)
 
 traj = pio.load_traj(myfile)
 pos = traj['pos']
+
+traj_len = pos.shape[0]
+print((traj_len//2))
 
 num_in_condensate = np.zeros(pos.shape[0])
 partition_coefficient = np.zeros(pos.shape[0])
@@ -56,16 +64,28 @@ for t in range(pos.shape[0]):
     #partition_coefficient[t] = (num_in_condensate[t]/Vcond)/((N)/(L**3))
 
 #Save final partition coefficients and concentrations
-rho_bg_avg = np.average(rho_bg[:-500])
-rho_c_avg = np.average(rho_c[:-500])
-partition_coefficient_avg = np.average(partition_coefficient[:-500])
+rho_bg_avg = np.average(rho_bg[-(traj_len//2):])
+rho_c_avg = np.average(rho_c[-(traj_len//2):])
+partition_coefficient_avg = np.average(partition_coefficient[-(traj_len//2):])
+
+print(partition_coefficient_avg)
 with open(outfile, 'w') as f:
     f.write('rho_bg rho_c K_c\n')
-    f.write('%f %f %f' % (rho_bg_avg, rho_c_avg, partition_coefficient_avg))
+    for t in range(pos.shape[0]):
+        f.write('%f %f %f\n' % (rho_bg[t], rho_c[t], partition_coefficient[t]))
+
+with open(outfileavg, 'w') as f:
+    f.write('rho_bg rho_c K_c\n')
+    f.write('%f %f %f\n' % (rho_bg_avg, rho_c_avg, partition_coefficient_avg))
 
 fig = plt.figure()
 plt.plot(np.arange(0,pos.shape[0],1), partition_coefficient)
-plt.axhline(y=np.average(partition_coefficient), color='red')
-plt.savefig('partition_coefficient_vs_time_Ec=%f.png' % Ec)
+plt.axhline(y=partition_coefficient_avg, color='red',label='average')
+if not os.path.isdir('plots/partition_coefficient'):
+    os.path.makedirs('plots/partition_coefficient')
+plt.xlabel('frame')
+plt.ylabel(r'$K_{\text{c}}$')
+plt.legend()
+plt.savefig('plots/partition_coefficient/partition_coefficient_vs_time_N=%d_L=%.01f_Vr=%.03f_Ec=%f_seed=%d.png' % (N, L, Vr, Ec, seed))
 #plt.show()
 

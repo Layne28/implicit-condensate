@@ -6,7 +6,7 @@
 #SBATCH --nodes=1
 #SBATCH --constraint=gpu
 #SBATCH --ntasks-per-node=4
-#SBATCH --time=24:00:00
+#SBATCH --time=48:00:00
 
 module load conda
 conda activate hoomd
@@ -17,9 +17,11 @@ do
     echo $cmd
     echo ""
     #eval $cmd &
-    srun --exact -u -n 1 --gpus-per-task 1 -c 32 --mem-per-gpu=55G ${cmd} & #> ${out_file} &
+    srun --exact -u -n 1 --gpus-per-task 1 -c 16 --mem-per-gpu=55G ${cmd} & #> output_$SLURM_PROCID.txt &
     c=$((c + 1))
     if [ $((c % 4)) -eq 0 ]; then
+        ps
+        nvidia-smi
         echo "waiting"
         wait
     fi
