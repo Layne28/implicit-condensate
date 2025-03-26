@@ -45,7 +45,7 @@ for i in range(10):
 
     #Anthony's code won't create traj_12.fsizes if no clusters of that size exist,
     #so need to open traj.sizes and check if there is any assembly >=12
-    if os.path.exists(myfolder + ("seed=%d/traj.sizes" % (i+1))) and os.path.exists(myfolder + ("seed=%d/traj_12.fsizes" % (i+1))):
+    if os.path.exists(myfolder + ("seed=%d/traj.sizes" % (i+1))):# and os.path.exists(myfolder + ("seed=%d/traj_12.fsizes" % (i+1))):
         nsamples += 1
         data = np.loadtxt(myfolder + ("seed=%d/traj.sizes" % (i+1)))
         traj_len = data.shape[0]

@@ -15,6 +15,7 @@ def main():
     dt = 5e-3
     kT = 1.0
     gamma=10.0
+    gamma_r=4*gamma/3
 
     parser = argparse.ArgumentParser()
 
@@ -118,9 +119,9 @@ def main():
     print('condensate radius:', R_cond)
 
     if rho==2.5: #default specificity
-        traj_output_dir += '/N=%d/L=%.01f/Vr=%.03f/E_cond=%f/E_bond=%f/seed=%d/' % (n_subunits, L, Vr, E_cond, E_bond, seednum)
+        traj_output_dir += '/N=%d/L=%.01f/Vr=%.03f/E_cond=%f/E_bond=%f/gamma_r=%f/seed=%d/' % (n_subunits, L, Vr, E_cond, E_bond, gamma_r, seednum)
     else:
-        traj_output_dir += '/N=%d/L=%.01f/Vr=%.03f/E_cond=%f/E_bond=%f/rho=%f/seed=%d/' % (n_subunits, L, Vr, E_cond, E_bond, rho, seednum)
+        traj_output_dir += '/N=%d/L=%.01f/Vr=%.03f/E_cond=%f/E_bond=%f/gamma_r=%f/rho=%f/seed=%d/' % (n_subunits, L, Vr, E_cond, E_bond, gamma_r, rho, seednum)
 
     #Create output directory if it doesn't exist
     if not os.path.exists(traj_output_dir):
@@ -143,7 +144,7 @@ def main():
     integrator = hoomd.md.Integrator(dt=dt, integrate_rotational_dof=True)
     integrator.rigid = rigid
     filtered_bodies = hoomd.filter.Rigid(("center", "free"))
-    int_method = hoomd.md.methods.Langevin(filter=filtered_bodies, kT=kT, default_gamma=gamma, default_gamma_r=(gamma/3,gamma/3,gamma/3))
+    int_method = hoomd.md.methods.Langevin(filter=filtered_bodies, kT=kT, default_gamma=gamma, default_gamma_r=(gamma_r,gamma_r,gamma_r))
     integrator.methods = [int_method]
 
     #####################################

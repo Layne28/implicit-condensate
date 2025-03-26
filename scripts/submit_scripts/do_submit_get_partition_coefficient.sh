@@ -20,7 +20,8 @@ for N in "${Ns[@]}"; do
         for Vr in "${Vrs[@]}"; do
             for Eb in "${Ebs[@]}"; do
                 for Ec in "${Ecs[@]}"; do
-                    input_folder=$SCRATCH/capsid-assembly/llps/droplet/assembly_trajectories/N=${N}/L=${L}/Vr=${Vr}/E_cond=${Ec}/E_bond=${Eb}/
+                    #input_folder=$SCRATCH/capsid-assembly/llps/droplet/assembly_trajectories/N=${N}/L=${L}/Vr=${Vr}/E_cond=${Ec}/E_bond=${Eb}/
+                    input_folder=$SCRATCH/capsid-assembly/llps/droplet/assembly_trajectories/N=${N}/L=${L}/Vr=${Vr}/E_cond=${Ec}/E_bond=${Eb}/gamma_r=13.333333/
                     echo ${input_folder}
                     for seed in "${seeds[@]}"; do
                         seed_file="${input_folder}seed=${seed}/traj.gsd"

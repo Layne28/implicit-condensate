@@ -42,8 +42,8 @@ fig = plt.figure()
 for i in range(len(Ecs)):
     plt.errorbar(Ebs, yield_arr[i,:], yerr=2*err_arr[i,:], label=r'$E_c=%.0f$' % Ecs[i], marker='o',markersize=3,capsize=2)
 plt.ylim([0.0,1.0])
-plt.ylabel(r'$f_{\text{c}}$')
-plt.xlabel(r'$\epsilon_{\text{ss}}$')
+plt.ylabel(r'yield, $f_{\text{c}}$')
+plt.xlabel(r'subunit-subunit binding affinity, $\epsilon_{\text{ss}}$')
 ax = plt.gca()
 ax.legend(bbox_to_anchor=(0.93,1.6),ncol=2)
 if do_near_perfect==1:

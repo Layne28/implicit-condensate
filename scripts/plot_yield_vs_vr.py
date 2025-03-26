@@ -10,7 +10,7 @@ do_near_perfect=0
 N=1200
 L=144.2
 Vrs=[0.002, 0.005, 0.01, 0.02, 0.05, 0.1]
-Eb=6.5
+Eb=6.0
 Ecs=[0,1,3,5,7]
 
 yield_arr=np.zeros((len(Ecs),len(Vrs)))
@@ -35,8 +35,8 @@ fig = plt.figure()
 for i in range(len(Ecs)):
     plt.errorbar(Vrs, yield_arr[i,:], yerr=2*err_arr[i,:], label=r'$E_c=%.0f$' % Ecs[i], marker='o',markersize=3,capsize=2)
 plt.ylim([0.0,1.0])
-plt.ylabel(r'$f_{\text{c}}$')
-plt.xlabel(r'$V_{\text{r}}$')
+plt.ylabel(r'yield, $f_{\text{c}}$')
+plt.xlabel(r'volume fraction, $V_{\text{r}}$')
 plt.legend(bbox_to_anchor=(0.93,1.6),ncol=2)
 plt.xscale('log')
 if do_near_perfect==1:
