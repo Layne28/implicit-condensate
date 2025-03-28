@@ -1,2 +1,5 @@
 *.gsd
 slurm*.out
+*.fsizes
+*.cl
+*.sizes
