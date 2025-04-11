@@ -6,7 +6,7 @@
 #SBATCH --nodes=1
 #SBATCH --constraint=cpu
 #SBATCH --ntasks-per-node=64
-#SBATCH --time=4:00:00
+#SBATCH --time=2:30:00
 
 module load conda
 conda activate hoomd

@@ -2,16 +2,18 @@
 #Get average yields
 
 nseed=$1
+startseed=5
+endseed=10
 
 script_name="$HOME/capsid-assembly/llps/droplet/scripts/equilibrate.py"
 
 Ns=(1200)
 #Ls=(288.5 228.9 181.7 158.7 144.2 133.9)
-#Ls=(144.2)
-Ls=(228.9 181.7 158.7 133.9 117.0 106.3)
+Ls=(144.2)
+#Ls=(228.9 181.7 158.7 133.9 117.0 106.3)
 Vrs=(0.005) #(0.005 0.002 0.001)
 
-seeds=($(seq 1 $nseed))
+seeds=($(seq $startseed $endseed))
 
 cmd_list=()
 

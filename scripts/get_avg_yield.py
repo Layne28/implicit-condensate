@@ -41,7 +41,9 @@ nsubunits = int(([e for e in myfolder.split('/') if e.startswith('N=')][0]).spli
 started = 0
 traj_len = 0
 nsamples = 0
-for i in range(10):
+nseed=4 #CHANGE THIS FOR FINAL RESULTS
+print('nseed:', nseed)
+for i in range(nseed):
 
     #Anthony's code won't create traj_12.fsizes if no clusters of that size exist,
     #so need to open traj.sizes and check if there is any assembly >=12
