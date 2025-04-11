@@ -6,6 +6,36 @@ import pickle
 import sys
 import gsd.hoomd
 
+def get_min_disp(r1, r2, edges):
+
+    """
+    Compute displacement respecting the minimum image convention.
+
+    INPUT: Two distance vectors (numpy arrays) and array of periodic box 
+           dimensions.
+    OUTPUT: Displacement vector (numpy array.)
+    """
+
+    arr1 = edges/2.0
+    arr2 = -edges/2.0
+    rdiff = r1-r2
+    rdiff = np.where(rdiff>arr1, rdiff-edges, rdiff)
+    rdiff = np.where(rdiff<arr2, rdiff+edges, rdiff)
+    return rdiff
+
+def get_min_dist(r1, r2, edges):
+
+    """
+    Compute distance respecting the minimum image convention.
+
+    INPUT: Two distance vectors (numpy arrays) and array of periodic box 
+           dimensions.
+    OUTPUT: Distance (float.)
+    """
+
+    rdiff = get_min_disp(r1,r2,edges)
+    return np.linalg.norm(rdiff)
+
 def apply_pbc(pos,edges):
 
     arr1 = edges/2.0
@@ -75,6 +105,30 @@ def get_capsid_concs(pos, edges, Vr):
 
     return rhonbg, rhonc
 
+def get_capsid_gr(pos, edges, nbins=400, maxr=40.0):
+
+    Vtot = edges[0]*edges[1]*edges[2]
+    r = np.linspace(0,maxr,nbins)
+    dr = maxr/nbins
+    gr = np.zeros(r.shape)
+
+    N = pos.shape[0]
+    for i in range(N-1):
+        for j in range(i+1,N):
+            dist = get_min_dist(pos[i,:],pos[j,:],edges)
+            index = int(dist/dr)
+            if index<=nbins:
+                gr[index] += 1
+
+    for i in range(r.shape[0]):
+        gr[i] /= 4*np.pi*(i*dr)**2*dr/Vtot
+
+    return r, gr
+
+
+############
+#Main
+############
 
 def main():
 
@@ -93,15 +147,26 @@ def main():
     capsid_coms = get_capsid_coms(cluster_data, edges)
 
     #Compute g(r)
+    r, gr = get_capsid_gr(capsid_coms, edges)
+    grfile=myfile.replace('traj.gsd','gr.txt')
+    np.savetxt(grfile, np.c_[r,gr], header='r g(r)')
 
     #Compute capsid concentrations in background/condensate
     rhonbg, rhonc = get_capsid_concs(capsid_coms, edges, Vr)
+    outfile=myfile.replace('traj.gsd','capsid_conc.txt')
+    with open(outfile, 'w') as f:
+        f.write('rhon_bg rhon_c\n')
+        f.write('%f %f\n' % (rhonbg, rhonc))
     
 
     # fig = plt.figure()
     # ax = fig.add_subplot(projection='3d')
     # ax.scatter(capsid_com_arr[:,0],capsid_com_arr[:,1],capsid_com_arr[:,2])
     # plt.show()
+
+    fig = plt.figure()
+    plt.plot(r,gr),
+    plt.show()
 
 
 if __name__=='__main__':
