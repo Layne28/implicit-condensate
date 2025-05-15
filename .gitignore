@@ -4,4 +4,4 @@ slurm*.out
 *.cl
 *.sizes
 monomer_density*.png
-SAASH
+SAASH/
