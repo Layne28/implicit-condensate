@@ -1,0 +1,69 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{epstopdf}
+\usepackage{abstract}
+\usepackage[toc,page]{appendix}
+\usepackage[sort]{cite}
+
+
+\usepackage{hyperref}
+
+
+\newcommand{\half}[0]{\frac{1}{2}}
+\newcommand{\bvec}[1]{\mathbf{#1}}
+\newcommand{\bigO}[2]{\mathcal{O}\left(#1^{#2} \right)}
+\newcommand{\dotprod}[2]{ \left<#1 , #2 \right> }
+
+\newcommand{\dd}[0]{ \mathrm{d} }
+
+\title{ Making truncated, irregular tetrahedra } 
+\author{ Stefan Paquay } 
+\date{  }
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+This document briefly describes how we generate truncated, irregular tetrahedra for simulation input.
+
+\section{Math}
+An irregular tetrahedron consists of four points in 3D space, which we denote $\bvec{x}_0,~\bvec{x}_1,~\bvec{x}_2$ and $\bvec{x}_3.$
+Without loss of generality, we can assume that the first three points are in the $xy$ plane, that $\bvec{x}_0$ and $\bvec{x}_1$ are on the $x$-axis, and that $\bvec{x}_2$ is on the $y$-axis.
+
+\subsection{Finding the base}
+We limit us to the special case where the base of the tetrahedron, the triangle spanned by $\bvec{x}_0, \bvec{x}_1, \bvec{x}_2,$ is an isocles angle.
+If single edge is $L_1$ and the two legs have length $L_2,$ then we can define
+\begin{equation*}
+  \bvec{x}_0 = (-L_1/2, 0, 0)^T, \qquad, \bvec{x}_1 = (L_1/2, 0, 0)^T, \qquad, \bvec{x}_2 = (0, y_2, 0)^T
+\end{equation*}
+with $y_2 = \sqrt{L_2^2 - L_1^2/4}$ in order for the legs to have length $L_2.$
+
+\subsection{Finding the top}
+With the complete base defined, our problem is now limited to finding a suitable ``top'' $\bvec{x}_3.$
+If we prescribe the tilt of two sides, then we think the third side will follow.
+If we describe the top in general coordinates $\bvec{x}_3 = (x,y,z)^T,$ then the projection of the top onto the $xy$-plane is $\bvec{x}_{3,\perp} = (x,y,0)^T.$
+
+Let the edges of the base be denoted $\bvec{b}_{01} = \bvec{x}_1 - \bvec{x}_0,$ $\bvec{b}_{12} = \bvec{x}_2 - \bvec{x}_1,$ and $\bvec{b}_{20} = \bvec{x}_0 - \bvec{x}_2.$ On each of these edges there are points $\bvec{h}_{01},~\bvec{h}_{12}$ and $\bvec{h}_{20}$ that are closest to $\bvec{x}_3$ and hence closest to $\bvec{x}_{3,\perp}.$
+To find this point, we parametrize the edges with parameters $t_{01},~t_{12}$ and $t_{20}$ and minimize the squared distances.
+
+Finding $t_{01}$ is by far the easiest because it lies on the $x$-axis:
+\begin{equation*}
+  \left\| \bvec{x}_0 + t \bvec{b}_{01} - \bvec{x}_{3,\perp}\right\|^2 = \left\| \left(-\frac{L_1}{2} + L_1t - x, -y, 0\right)^T \right\|^2 = y^2 + \left(L_1\left(t-\half\right) - x\right)^2
+\end{equation*}
+This expression is minimized for $t = \half + x/L_1 := t_{01},$ and therefore we have $\bvec{h}_{01} = \bvec{x}_0 + t_{01}\bvec{b}_{01} = ( x, 0, 0, )^T.$
+The distance between $\bvec{h}_{01}$ and $\bvec{x}_{3,\perp}$ is simply $(0,y,0)^T.$
+The points $\bvec{h}_{01},$ $\bvec{x}_{3,\perp}$ and $\bvec{x}_3$ span a right triangle whose slant is related to the tilt of this face.
+In particular, the angle between the long side and $-z \bvec{e}_z$ is the \emph{tilt} $\vartheta_{01}.$
+Let $\phi_{01}$ be the angle between $\bvec{x}_{3,\perp} - \bvec{h}_{01}$ and $\bvec{x}_3 - \bvec{h}_{01}.$
+Then $\vartheta_{01} = \pi/2 - \phi_{01}$ and $\tan \phi_{01} = z/y,$ so $\tan (\pi/2 - \vartheta_{01}) = z/y.$
+This is the first relation that fixes one of the coordinates of the top, $\bvec{x}_3.$
+
+To find a similar relation for the second tilt, we now move to find 
+
+\end{document}

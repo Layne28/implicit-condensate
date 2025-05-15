@@ -1,0 +1,341 @@
+from __future__ import print_function
+
+import numpy as np, math, sys, copy
+import newton, tetrahedron
+
+
+def gram_schmidt( v1, v2 ):
+    """ Returns the part of v2 that is perpendicular to v1. """
+    dot = np.dot( v1, v2 )
+    n2 = np.dot( v2, v2 )
+    n1 = np.dot( v1, v1 )
+
+    return v2 - dot * v1 / (math.sqrt(n1*n2))
+
+
+def find_intersection_xy_plane( x1, u1, x2, u2 ):
+    """ Finds the intersection of the lines x1 + u1*t1 and x2 + u2*t2. """
+    x1 = copy.copy( x1 )
+    x2 = copy.copy( x2  )
+    
+    x1[2] = 0.0
+    x2[2] = 0.0
+    assert u1[2] == 0, "Direction vectors may not be out of xy-plane!"
+    assert u2[2] == 0, "Direction vectors may not be out of xy-plane!"
+    
+    
+    dx = x1 - x2
+    dx_u2 = np.cross( dx, u2 )
+    u2_u1 = np.cross( u2, u1 )
+    t1 = dx_u2[2] / u2_u1[2]
+    t2 = (dx[0] + u1[0]*t1) / u2[0]
+
+    i1 = x1 + t1*u1
+    i2 = x2 + t2*u2
+
+    return i1
+    
+
+
+
+def get_ico_vertices( ico = None ):
+    """ Returns a list with the icosahedron vertices. """
+    if ico is None:
+        ico = 'T1'
+
+    phi = 0.5 * math.sqrt(5) + 0.5
+    if ico == 'T1':
+        N = 12
+        X = np.zeros( [ N,3 ], dtype = float )
+        X[0]  = ( 1, 0,  phi)
+        X[1]  = (-1, 0,  phi)
+        X[2]  = ( 1, 0, -phi)
+        X[3]  = (-1, 0, -phi)
+        X[4]  = (0,  phi,  1)
+        X[5]  = (0,  phi, -1)
+        X[6]  = (0, -phi,  1)
+        X[7]  = (0, -phi, -1)
+        X[8]  = ( phi,  1, 0)
+        X[9]  = ( phi, -1, 0)
+        X[10] = (-phi,  1, 0)
+        X[11] = (-phi, -1, 0)
+        
+    elif ico == 'T3':
+        N = 32
+        X = np.zeros( [ N,3 ], dtype = float )
+        T1_verts = get_ico_vertices( 'T1' )
+        X[0:12] = T1_verts
+        
+        idx = 12
+        r2min = 4.0
+        R = math.sqrt( np.dot( X[0], X[0] ) )
+        for i in range(0,12):
+            xi = X[i]
+            for j in range(0,i):
+                xj = X[j]
+                dij = xi - xj
+                rij2 = np.dot(dij,dij)
+
+                if rij2 > r2min:
+                    continue
+                for k in range(0,j):
+                    # Loop over triplets, make sure they are nearest.
+                    xk = X[k]
+                    dik = xi - xk
+                    djk = xj - xk
+                    rik2 = np.dot(dik,dik)
+                    if rik2 > r2min:
+                        continue
+                    rjk2 = np.dot(djk,djk)
+                    if rjk2 > r2min:
+                        continue
+
+                    print("Got triplet (", i, j, k, ").", file = sys.stderr)
+                    # Interpolate:
+                    xnew = (xi + xj + xk)
+                    norm = math.sqrt( np.dot(xnew, xnew) )
+                    
+                    X[idx] = xnew * R / norm
+                    idx += 1
+                    
+        
+    elif ico == 'T4':
+        N = 42
+        X = np.zeros( [ N,3 ], dtype = float )
+        T1_verts = get_ico_vertices( 'T1' )
+        X[0:12] = T1_verts
+        
+        idx = 12
+        r2min = 4.0
+        R = math.sqrt( np.dot( X[0], X[0] ) )
+        # For T = 4 you interpolate between the vertices, not the faces.
+        for i in range(0,12):
+            xi = X[i]
+            for j in range(0,i):
+                xj = X[j]
+                dij = xi - xj
+                rij2 = np.dot(dij,dij)
+                if rij2 > r2min:
+                    continue
+
+                xh = 0.5*(xi + xj)
+                norm = math.sqrt(np.dot(xh,xh))
+                X[idx] = xh * R / norm
+                idx += 1
+
+    else:
+        raise RuntimeError("Unknown icosahedron type", ico)
+
+    return X
+
+
+def make_triangles( N_rows, N_per_edge, vertices, patch_dist,
+                    min_distance = 0.0. N_patches = 1 ):
+    """ Tiles particles on given vertices and adds patches. """
+    # So that people can say "6" and actually get 6 per edge:
+    N_per_edge -= 1
+    N_parts = N_rows * N_per_edge * 3
+
+    # Add 6*N_patches:
+    N_parts += 6*N_patches
+
+    X = np.zeros( [N_parts,3], dtype = float )
+    i = 0
+
+    zmin = vertices[0][2]
+    for v in vertices:
+        if zmin > v[2]:
+            zmin = v[2]
+
+    dtz = 1.0 / float( N_rows - 1.0 )
+
+
+    
+    for row in range(0, N_rows):
+        for edge in range(0, 3):
+            edgep = edge + 1
+            if edgep == 3: edgep = 0
+
+            x0 = copy.deepcopy( vertices[ edge ] )
+            x1 = copy.deepcopy( vertices[ edgep ] )
+            z0 = copy.deepcopy( vertices[ edge + 3 ] )
+            z1 = copy.deepcopy( vertices[ edgep + 3 ] )
+            
+            b03 = z0 - x0
+            b13 = z1 - x1
+
+            print( b03, b13, file = sys.stderr )
+            
+            xl = x0 + b03 * dtz * row
+            xr = x1 + b13 * dtz * row
+
+            brl = xr - xl
+            
+            L2 = np.dot( brl, brl )
+            L = math.sqrt(L2)
+            dx = L / (N_per_edge+1)
+
+            print( "Depositing", N_per_edge, "beads along edge of length", L,
+                   "so dx =", dx, file = sys.stderr )
+            for k in range(0, N_per_edge):
+                tt = k / float(N_per_edge)
+                X[i] = xl + tt * brl
+                i += 1
+
+    N_nonpatch = i
+    # Add the edge particles:
+    tmp = []
+    row = 1
+    for edge in range(0, 3):
+        edgep = edge + 1
+        if edgep == 3: edgep = 0
+
+        x0 = copy.deepcopy( vertices[ edge ] )
+        x1 = copy.deepcopy( vertices[ edgep ] )
+        z0 = copy.deepcopy( vertices[ edge + 3 ] )
+        z1 = copy.deepcopy( vertices[ edgep + 3 ] )
+        
+        b03 = z0 - x0
+        b13 = z1 - x1
+
+        xl = x0 + b03 * dtz * row
+        xr = x1 + b13 * dtz * row
+        brl = xr - xl
+        tt = 0.5
+        xh = xl + tt * brl
+        nbrl = math.sqrt( np.dot( brl, brl ) )
+
+        rrrr = 0.5*patch_dist*brl / nbrl
+        
+        for j in N_patches//2:
+            xp_left  = xh - rrrr*(1+j)
+            xp_right = xh + rrrr*(1+j)
+            X[i] = xp_left
+            X[i+1] = xp_right
+            i += 2
+
+    # Remove any overlap:
+    min_dist2 = min_distance*min_distance
+    for i in range(0,N_parts):
+        xi = X[i]
+        for j in range(N_nonpatch, N_parts):
+            if i == j: continue
+
+            have_overlap = False
+            xj = X[j]
+            r2 = np.dot( xj - xi, xj - xi )
+            if r2 < min_dist2:
+                have_overlap = True
+                break
+        if have_overlap:
+            print( "Skipping", i, "due to overlap with", j,
+                   file = sys.stderr )
+        else:
+            tmp.append( xi )
+
+    X = np.array( tmp )
+    return X
+
+
+def make_octo(Nbeads = 6, Nrows = 3):
+    """ Makes a octohedra-forming triangle. """
+    # Ensure the distance between points is always 0.5:
+    L1 = 0.5*Nbeads
+    tilt = math.pi / 4.0
+    print( "Longest edge length should be", L1, file = sys.stderr )
+    vertices = tetrahedron.generate_truncated( L1_scaled, L1_scaled,
+                                               tilt, tilt, tilt, 1.0 )
+    X = make_triangles( Nrows, Nbeads, verts, 1.0, 0.25  )
+    
+    return X
+
+
+def make_T1(Nbeads = 5):
+    """ Makes a T1 triangle. """
+
+    L1_scaled = 0.5*Nbeads
+    dihedral_angle = 138.189685*math.pi / 180.0 # From Wikipedia.
+    tilt = (math.pi - dihedral_angle)/2.0
+    
+    vertices = tetrahedron.generate_truncated( L1_scaled, L1_scaled,
+                                               tilt, tilt, tilt, 1.0 )
+    X = make_triangles( Nbeads, vertices, dihedral_angles )
+    
+    return X
+
+
+
+def output_verts( verts, outname ):
+    """ Prints vertices to a simple xyz file. """
+    with open(outname, "w") as f:
+        print( len(verts), file = f )
+        print( 3, file = f)
+        for xx in verts:
+            print( xx[0], xx[1], xx[2], file = f )
+    
+
+
+    
+if __name__ == "__main__":
+    mode = 'T1'
+    Nbeads = 6
+    outname = "-"
+
+    
+    if len(sys.argv) > 1:
+        # Parse options.
+        i = 1
+        argc = len(sys.argv)
+        while i < argc:
+            arg = sys.argv[i]
+            if arg == "-N" or arg == "--Nbeads":
+                assert i+1 < argc, "-N needs a number!"
+                Nbeads = int(sys.argv[i+1])
+                i += 2
+            elif arg == "-m" or arg == "--mode":
+                assert i+1 < argc, "-m needs a mode!"
+                mode = sys.argv[i+1]
+                i += 2
+            elif arg == "-o" or arg == "--output":
+                assert i+1 < argc, "-o needs a file name!"
+                outname = sys.argv[i+1]
+                i += 2
+            else:
+                print("Unknown argument", arg, "!", file = sys.stderr)
+                sys.exit(-1)
+
+    print( "Generating", mode, "with", Nbeads, "beads to file ", outname,
+           file = sys.stderr )
+
+    single_triangle_mode = True
+
+    if mode == 'T1':
+        X = make_T1(Nbeads)
+    elif mode == 'T3':
+        X = make_T3(Nbeads)
+    elif mode == 'octo':
+        X = make_octo(Nbeads)
+    elif mode == 'T4':
+        X = make_T4(Nbeads)
+
+    elif mode == 'T1-verts':
+        single_triangle_mode = False
+        verts = get_ico_vertices( 'T1' )
+    elif mode == 'T3-verts':
+        single_triangle_mode = False
+        verts = get_ico_vertices( 'T3' )
+    elif mode == 'T4-verts':
+        single_triangle_mode = False
+        verts = get_ico_vertices( 'T4' )
+    elif mode == 'T7-verts':
+        single_triangle_mode = False
+        verts = get_ico_vertices( 'T7' )
+    else:
+        print("Mode", mode, "not recognized!", file = sys.stderr)
+        sys.exit(-1)
+
+    if single_triangle_mode:
+        output_data( X, outname )
+    else:
+        output_verts( verts, outname )
+        

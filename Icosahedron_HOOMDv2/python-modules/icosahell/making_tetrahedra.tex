@@ -1,0 +1,114 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{epstopdf}
+\usepackage{abstract}
+\usepackage[toc,page]{appendix}
+\usepackage[sort]{cite}
+
+
+\usepackage{hyperref}
+
+
+\newcommand{\half}[0]{\frac{1}{2}}
+\newcommand{\bvec}[1]{\mathbf{#1}}
+\newcommand{\bigO}[2]{\mathcal{O}\left(#1^{#2} \right)}
+\newcommand{\dotprod}[2]{ \left<#1 , #2 \right> }
+
+\newcommand{\dd}[0]{ \mathrm{d} }
+
+\title{ Making truncated, irregular tetrahedra } 
+\author{ Stefan Paquay } 
+\date{  }
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+This document briefly describes how we generate truncated, irregular tetrahedra for simulation input.
+
+\section{Math}
+An irregular tetrahedron consists of four points in 3D space, which we denote $\bvec{x}_0,~\bvec{x}_1,~\bvec{x}_2$ and $\bvec{x}_3.$
+Without loss of generality, we can assume that the first three points are in the $xy$ plane, that $\bvec{x}_0$ and $\bvec{x}_1$ are on the $x$-axis, and that $\bvec{x}_2$ is on the $y$-axis.
+
+\subsection{Finding the base}
+We limit us to the special case where the base of the tetrahedron, the triangle spanned by $\bvec{x}_0, \bvec{x}_1, \bvec{x}_2,$ is an isocles angle.
+If single edge is $L_1$ and the two legs have length $L_2,$ then we can define
+\begin{equation*}
+  \bvec{x}_0 = (-L_1/2, 0, 0)^T, \qquad, \bvec{x}_1 = (L_1/2, 0, 0)^T, \qquad, \bvec{x}_2 = (0, y_2, 0)^T
+\end{equation*}
+with $y_2 = \sqrt{L_2^2 - L_1^2/4}$ in order for the legs to have length $L_2.$
+
+\subsection{Finding the top}
+With the complete base defined, our problem is now limited to finding a suitable ``top'' $\bvec{x}_3.$
+If we prescribe the tilt of two sides, then we think the third side will follow.
+If we describe the top in general coordinates $\bvec{x}_3 = (x,y,z)^T,$ then the projection of the top onto the $xy$-plane is $\bvec{x}_{3,\perp} = (x,y,0)^T.$
+
+Let the edges of the base be denoted $\bvec{b}_{01} = \bvec{x}_1 - \bvec{x}_0,$ $\bvec{b}_{12} = \bvec{x}_2 - \bvec{x}_1,$ and $\bvec{b}_{20} = \bvec{x}_0 - \bvec{x}_2.$ On each of these edges there are points $\bvec{h}_{01},~\bvec{h}_{12}$ and $\bvec{h}_{20}$ that are closest to $\bvec{x}_3$ and hence closest to $\bvec{x}_{3,\perp}.$
+To find this point, we parametrize the edges with parameters $t_{01},~t_{12}$ and $t_{20}$ and minimize the squared distances.
+
+Finding $t_{01}$ is by far the easiest because it lies on the $x$-axis:
+\begin{equation*}
+  \left\| \bvec{x}_0 + t \bvec{b}_{01} - \bvec{x}_{3,\perp}\right\|^2 = \left\| \left(-\frac{L_1}{2} + L_1t - x, -y, 0\right)^T \right\|^2 = y^2 + \left(L_1\left(t-\half\right) - x\right)^2
+\end{equation*}
+This expression is minimized for $t = \half + x/L_1 := t_{01},$ and therefore we have $\bvec{h}_{01} = \bvec{x}_0 + t_{01}\bvec{b}_{01} = ( x, 0, 0 )^T.$
+The distance between $\bvec{h}_{01}$ and $\bvec{x}_{3,\perp}$ is simply $(0,y,0)^T.$
+The points $\bvec{h}_{01},$ $\bvec{x}_{3,\perp}$ and $\bvec{x}_3$ span a right triangle whose slant is related to the tilt of this face.
+In particular, the angle between the long side and $-z \bvec{e}_z$ is the \emph{tilt} $\vartheta_{01}.$
+Let $\phi_{01}$ be the angle between $\bvec{x}_{3,\perp} - \bvec{h}_{01}$ and $\bvec{x}_3 - \bvec{h}_{01}.$
+Then $\vartheta_{01} = \pi/2 - \phi_{01}$ and $\tan \phi_{01} = z/y,$ so $\tan (\pi/2 - \vartheta_{01}) = z/y.$
+This is the first relation that fixes one of the coordinates of the top, $\bvec{x}_3.$
+
+To find a similar relation for the second tilt, we now move to find $\bvec{h}_{12}$ in a similar fashion.
+We have $\bvec{h}_{12} = \bvec{x}_1 + t(\bvec{x}_2 - \bvec{x}_1)$ and minimize $\left\| \bvec{x}_{3,\perp} - \bvec{h}_{12} \right\|^2.$
+\begin{align*}
+  \frac{\partial}{\partial t}\left\| \bvec{x}_{3,\perp} - \bvec{h}_{12} \right\|^2 =& \frac{\partial}{\partial t}( x + L_1 (1-t)t / 2 )^2 + (y_2 t - y)^2 = 0  \\
+                                                                                    &( x + L_1 (1-t)t / 2 )(-L_1/2) + (y_2 t - y)y_2 = 0 \\
+  t_{12} =& \frac{ y y_2 - L_1x/2}{y_2^2 - L_1^2/4}
+\end{align*}
+Therefore the point on $\bvec{b}_{12}$ closest to $\bvec{x}_{3,\perp}$ is given by $\bvec{h}_{12} = \bvec{x}_1 + t_{12} \bvec{b}_{12}:$
+\begin{align*}
+  \bvec{h}_{12} &= \begin{pmatrix}
+    L_1/2 \\
+    0 \\
+    0
+  \end{pmatrix} + \frac{y y_2 - L_1 x / 2}{y_2^2 - L_1^2/4}\begin{pmatrix}
+    -L_1/2\\
+    y_0 \\
+    0
+  \end{pmatrix} \\
+  &= \frac{1}{y_2^2 - \frac{L_1^2}{4} } \begin{pmatrix}
+    \frac{L_1}{2}\left( y_2^2 - \frac{L_1^2}{4} - \left(y y_2 - \frac{L_1}{2}x\right) \right) \\
+    y_2 \left( y y_2 - \frac{L_1}{2}x \right)
+    0
+  \end{pmatrix}
+\end{align*}
+We can rewrite $\bvec{h}_{12}$ entirely in vector form:
+\begin{equation*}
+  \bvec{h}_{12} = (\bvec{x}_{3,\perp} - \bvec{b}_{12}) - \frac{\bvec{b}_{12} \cdot \bvec{x}_{3,\perp}}{\bvec{b}_{12}\cdot \bvec{b}_{12}} \bvec{b}_{12} 
+\end{equation*}
+This means that the distance between the shortest point on the edge $\bvec{b}_{12}$ and $\bvec{x}_{3,\perp}$ can be found as
+\begin{align*}
+  L^2 =& \left\| \bvec{h}_{12} - \bvec{x}_{3,\perp} \right\|^2 = \left[ \bvec{x}_{3,\perp} - \bvec{b}_{12} - \frac{\bvec{b}_{12}\cdot \bvec{x}_{3,\perp}}{\bvec{b}_{12} \cdot \bvec{b}_{12}}\bvec{b}_{12} \right]^2 \\
+  =& x^2 + y^2 + \frac{L_1^2}{4} + y_2^2 - \frac{y^2 y_2^2 + L_1^2x^2/4 - L_1y_2 x y}{L_1^2/4 + y_2^2} = y_2^2 + \frac{L_1^2}{4} + \frac{(\half L_1 y + x y_2)^2}{L_1^2/4 + y_2^2}
+\end{align*}
+Due to triangle geometry, we have $\tan \phi_{12} = z / L = y \tan \phi_{01} / L,$ so all we need is to is solve $\tan \phi_{12} = y \tan \phi_{01} / L(x,y)$ for $y$ and then we have fixed the second tilt.
+In principle we can use the $x$-component of $\bvec{x}_3$ to prescribe the third tilt, but we will leave it free for now.
+So, we have $\tan \phi_{12} = y \tan \phi_{01} / L(x,y),$ or,
+\begin{align*}
+  L^2 \tan^2\phi_{12} = \left( y_2^2 + \frac{L_1^2}{4} + \frac{(\half L_1 y + x y_2)^2}{L_1^2/4 + y_2^2} \right)\tan^2\phi_{12} = y^2 \tan \phi_{01}
+\end{align*}
+Solving this for $y$ leads to the general solution
+\begin{align*}
+  y(x) =& \frac{L_1 y_2 x \tan^2 \phi_{12}}{2(L_2^2 \tan^2 \phi_{01} - \frac{1}{4}L_1^2 \tan^2\phi_{12})} \\
+  &\pm \frac{x^2 \tan^2\phi_{12}\left( \frac{L_1}{2}y^2_2\tan^2\phi_{01} + L_2^2y_2^2\right) + \frac{L_2^4}{4}\left( L_2^2 \tan^2\phi_{01} - L_1^2\tan^2\phi_{21} \right)}{L_2^2 \tan^2 \phi_{01} - \frac{1}{4}L_1^2 \tan^2\phi_{01}}
+\end{align*}
+With this expression, we can fix, for a given $x,$ the $y$-coordinate and subsequently the $z$-coordinate so that two of the three faces have a fixed angle.
+
+
+\end{document}
