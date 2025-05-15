@@ -4,3 +4,8 @@ Key simulation scripts:
 1. "initialize.py": Creates an initial lattice of capsid subunits.
 2. "equilibrate.py": Randomizes the subunit positions while respecting excluded volume interactions.
 3. "run.py": Runs molecular dynamics simulation of capsid assembly.
+
+Key analysis scripts:
+1. "cluster.py": Uses the SAASH analysis package (https://github.com/onehalfatsquared/SAASH.git) to get cluster size distributions.
+2. "cluster_track_pos.py": Uses the SAASH analysis package to track detailed properties of individual clusters. Needed to get capsid centers of mass.
+3. "get_avg_yield.py": From output of "cluster.py", compute the yield of individual trajectories, and then average yields over trajectories.
