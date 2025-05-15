@@ -2,15 +2,15 @@
 #Get average yields
 
 nseed=$1
-startseed=5
+startseed=1
 endseed=10
 
-script_name="$HOME/capsid-assembly/llps/droplet/scripts/equilibrate.py"
+script_name="$HOME/capsid-assembly/llps/droplet/scripts/equilibrate_hpcc.py"
 
 Ns=(1200)
 #Ls=(288.5 228.9 181.7 158.7 144.2 133.9)
-Ls=(144.2)
-#Ls=(228.9 181.7 158.7 133.9 117.0 106.3)
+Ls=(391.5)
+#Ls=(391.5 288.5 228.9 181.7 158.7 144.2 133.9 117.0 106.3)
 Vrs=(0.005) #(0.005 0.002 0.001)
 
 seeds=($(seq $startseed $endseed))
@@ -26,7 +26,8 @@ for N in "${Ns[@]}"; do
 
                 run_command="python ${script_name} -i ${input_file} -s ${seed}"
                 cmd_list+=("${run_command}")
-                eval $run_command
+                #eval $run_command
+                sbatch $HOME/capsid-assembly/llps/droplet/scripts/submit_scripts/submit_run.sh "${run_command}"
             done
         done
     done

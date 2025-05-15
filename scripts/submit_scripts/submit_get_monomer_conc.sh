@@ -1,15 +1,14 @@
 #!/bin/bash
-#Run trajectory
+#Get monomer conc
 
-#SBATCH -A m4494
-#SBATCH --qos=regular
+#SBATCH --account=hagan-lab
+#SBATCH --partition=hagan-compute
 #SBATCH --nodes=1
-#SBATCH --constraint=cpu
-#SBATCH --ntasks-per-node=64
-#SBATCH --time=3:00:00
+#SBATCH --time=4:00:00
+#SBATCH --ntasks-per-node=4
 
 module load conda
-conda activate analyze
+module --ignore-cache load "share_modules/HOOMD/4.6.0"
 
 c=0
 for cmd in "$@"
@@ -17,11 +16,7 @@ do
     echo $cmd
     echo ""
     #eval $cmd &
-    srun --exact -u -n 1 --cpus-per-task 2 ${cmd} & #> ${out_file} &
-    c=$((c + 1))
-    if [ $((c % 64)) -eq 0 ]; then
-        echo "waiting"
-        wait
-    fi
+    #srun --exact -u -n 1 --cpus-per-task 2 ${cmd} & #> ${out_file} &
+    ${cmd}
 done
 wait

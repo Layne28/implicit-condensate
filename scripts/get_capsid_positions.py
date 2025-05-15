@@ -164,9 +164,10 @@ def main():
     # ax.scatter(capsid_com_arr[:,0],capsid_com_arr[:,1],capsid_com_arr[:,2])
     # plt.show()
 
+    print(np.c_[r,gr])
     fig = plt.figure()
-    plt.plot(r,gr),
-    plt.show()
+    plt.plot(r,gr)
+    #plt.show()
 
 
 if __name__=='__main__':

@@ -9,7 +9,8 @@ nseed=$1
 
 Ns=(1200)
 Ls=(144.2)
-Vrs=(0.100 0.050 0.020 0.010 0.002) #(0.005 0.002 0.001)
+Vrs=(0.100 0.050 0.020 0.010 0.003 0.002 0.001)
+#Vrs=(0.100 0.050 0.020 0.010 0.002) #(0.005 0.002 0.001)
 Ebs=(6.000000)
 Ecs=(0.000000 1.000000 3.000000 5.000000 7.000000)
 
@@ -23,36 +24,16 @@ for N in "${Ns[@]}"; do
             for Eb in "${Ebs[@]}"; do
                 for Ec in "${Ecs[@]}"; do
                     for seed in "${seeds[@]}"; do
-                        input_file=$SCRATCH/capsid-assembly/llps/droplet/assembly_trajectories/N=${N}/L=${L}/Vr=${Vr}/E_cond=${Ec}/E_bond=${Eb}/seed=${seed}/traj.gsd
+                        input_file=$SCRATCH/capsid-assembly/llps/droplet/assembly_trajectories/N=${N}/L=${L}/Vr=${Vr}/E_cond=${Ec}/E_bond=${Eb}/gamma_r=13.333333/seed=${seed}/traj.gsd
 
                         out_file=$SCRATCH/capsid-assembly/llps/droplet/out_files/cluster_N=${N}_L=${L}_Vr=${Vr}_Eb=${Eb}_Ec=${Ec}_seed=${seed}.out
 
                         run_command="python ${script_name} ${input_file} ${ixn_file} 1"
-                        cmd_list+=("${run_command}")
+                        sbatch $HOME/capsid-assembly/llps/droplet/scripts/submit_scripts/submit_cluster.sh "${run_command}"
                     done
                 done
              done
         done
     done
 done
-
-cmd_list_short=()
-c=0
-for cmd in "${cmd_list[@]}"; do
-    echo $cmd
-    cmd_list_short+=("${cmd}")
-    c=$((c + 1))
-    if [ $((c % ${n_run_per_node})) -eq 0 ]; then
-        echo "submitting"
-        sbatch $HOME/capsid-assembly/llps/droplet/scripts/submit_scripts/submit_cluster.sh "${cmd_list_short[@]}"
-        #$HOME/capsid-assembly/llps/droplet/scripts/submit_scripts/submit_cluster.sh "${cmd_list_short[@]}"
-        # for thing in "${cmd_list_short[@]}"; do
-        #     echo $thing
-        #     echo "\n"
-        # done
-        c=0
-        cmd_list_short=()
-    fi
-done
-sbatch $HOME/capsid-assembly/llps/droplet/scripts/submit_scripts/submit_cluster.sh "${cmd_list_short[@]}"
 

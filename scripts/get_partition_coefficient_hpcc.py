@@ -5,6 +5,7 @@ import numpy as np
 import sys
 import numpy.linalg as la
 import os
+import gsd.hoomd
 
 import AnalysisTools.particle_io as pio
 
@@ -34,23 +35,24 @@ Vcond = (L**3)*Vr
 Rcond = (Vcond/(4.0*np.pi/3.0))**(1.0/3)
 print(Rcond)
 
-traj = pio.load_traj(myfile)
-pos = traj['pos']
+#traj = pio.load_traj(myfile)
+traj = gsd.hoomd.open(myfile)
 
-traj_len = pos.shape[0]
+traj_len = len(traj)
 print((traj_len//2))
 
-num_in_condensate = np.zeros(pos.shape[0])
-partition_coefficient = np.zeros(pos.shape[0])
-rho_bg = np.zeros(pos.shape[0])
-rho_c = np.zeros(pos.shape[0])
-for t in range(pos.shape[0]):
+num_in_condensate = np.zeros(traj_len)
+partition_coefficient = np.zeros(traj_len)
+rho_bg = np.zeros(traj_len)
+rho_c = np.zeros(traj_len)
+for t in range(traj_len):
     print(t)
+    pos = traj[t].particles.position
     ncount=0
-    for i in range(pos.shape[1]):
+    for i in range(pos.shape[0]):
         # if traj['particle_typeids'][i]==0:
         #     ncount += 1
-        if traj['particle_typeids'][i]==0 and la.norm(pos[t,i,:])<=Rcond:#tools.get_dist(pos[t,i,:], np.zeros(3), traj['edges'])<=Rcond:
+        if traj[t].particles.typeid[i]==0 and la.norm(pos[i,:])<=Rcond:#tools.get_dist(pos[t,i,:], np.zeros(3), traj['edges'])<=Rcond:
             num_in_condensate[t]+=1
     print('density in condensate/bulk:', num_in_condensate[t]/Vcond, (N-num_in_condensate[t])/(L**3-Vcond))
     rho1 = num_in_condensate[t]/Vcond

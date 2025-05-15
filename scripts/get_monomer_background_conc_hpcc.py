@@ -9,7 +9,6 @@ import pickle
 import gsd.hoomd
 
 import AnalysisTools.particle_io as pio
-import AnalysisTools.measurement_tools as tools
 
 myfile = sys.argv[1]  #traj.gsd
 myfile2 = sys.argv[2] #traj.cl
@@ -38,10 +37,10 @@ Rcond = (Vcond/(4.0*np.pi/3.0))**(1.0/3)
 print(Rcond)
 
 #Load actual trajectory
-traj = pio.load_traj(myfile)
-pos = traj['pos']
+#traj = pio.load_traj(myfile)
 
 traj2 = gsd.hoomd.open(myfile)
+
 
 #Load size distribution
 with open(myfile2,mode='rb') as f:
@@ -49,24 +48,25 @@ with open(myfile2,mode='rb') as f:
 #counts = np.loadtxt(myfile2)
 #tot_monomer_count = counts[:,1]
 
-traj_len = pos.shape[0]
+traj_len = len(traj2)
 
 print(traj_len)
 print(dir(cluster_data))
 print(len(cluster_data.__dict__['monomer_ids']))
 
-num_out_condensate = np.zeros(pos.shape[0])
-rho1_bg = np.zeros(pos.shape[0])
-rho1_c = np.zeros(pos.shape[0])
-for t in range(pos.shape[0]-1):
+num_out_condensate = np.zeros(traj_len)
+rho1_bg = np.zeros(traj_len)
+rho1_c = np.zeros(traj_len)
+for t in range(traj_len-1):
     print(t)
     monomer_id_list = sorted([int(e) for e in cluster_data.__dict__['monomer_ids'][t]])
     tot_monomer_count = len(monomer_id_list)
+    pos = traj2[t].particles.position
     ncount=0
-    for i in range(pos.shape[1]):
+    for i in range(pos.shape[0]):
         #print(monomer_id_list)
         #check if (1) atom is a "Capsomer" (2) atom is within Rcond of origin (3) atom is in the monomer list
-        if traj['particle_typeids'][i]==0 and la.norm(pos[t,i,:])>(Rcond) and (traj2[t].particles.body[i] in monomer_id_list):#tools.get_dist(pos[t,i,:], np.zeros(3), traj['edges'])<=Rcond:
+        if traj2[t].particles.typeid[i]==0 and la.norm(pos[i,:])>(Rcond) and (traj2[t].particles.body[i] in monomer_id_list):#tools.get_dist(pos[t,i,:], np.zeros(3), traj['edges'])<=Rcond:
             num_out_condensate[t]+=1
     print('concentration in condensate/bulk:', (tot_monomer_count-num_out_condensate[t])/Vcond, (num_out_condensate[t])/(L**3-Vcond))
     rho1 = (tot_monomer_count - num_out_condensate[t])/Vcond
@@ -75,7 +75,7 @@ for t in range(pos.shape[0]-1):
     rho1_c[t] = rho1
 with open(outfile, 'w') as f:
     f.write('frame rho1_bg rho1_c\n')
-    for t in range(pos.shape[0]):
+    for t in range(rho1_bg.shape[0]):
         f.write('%d %f %f\n' % (t, rho1_bg[t], rho1_c[t]))
 
 #fig = plt.figure()

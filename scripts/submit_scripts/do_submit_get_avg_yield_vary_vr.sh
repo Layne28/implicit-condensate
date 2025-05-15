@@ -6,11 +6,9 @@ script_name="$HOME/capsid-assembly/llps/droplet/scripts/get_avg_yield.py"
 
 Ns=(1200)
 Ls=(144.2)
-Vrs=(0.100 0.050 0.020 0.010 0.002)
+Vrs=(0.100 0.050 0.020 0.010 0.003 0.002 0.001)
 Ebs=(6.000000)
-Ecs=(0.000000 1.000000 3.000000 5.000000 7.000000)
-
-seeds=($(seq 1 $nseed))
+Ecs=(0.000000 3.000000 5.000000 7.000000)
 
 cmd_list=()
 
@@ -19,7 +17,7 @@ for N in "${Ns[@]}"; do
         for Vr in "${Vrs[@]}"; do
             for Eb in "${Ebs[@]}"; do
                 for Ec in "${Ecs[@]}"; do
-                    input_folder=$SCRATCH/capsid-assembly/llps/droplet/assembly_trajectories/N=${N}/L=${L}/Vr=${Vr}/E_cond=${Ec}/E_bond=${Eb}/
+                    input_folder=$SCRATCH/capsid-assembly/llps/droplet/assembly_trajectories/N=${N}/L=${L}/Vr=${Vr}/E_cond=${Ec}/E_bond=${Eb}/gamma_r=13.333333/
                     echo ${input_folder}
                     out_file=$SCRATCH/capsid-assembly/llps/droplet/out_files/get_avg_yield_N=${N}_L=${L}_Vr=${Vr}_Eb=${Eb}_Ec=${Ec}.out
 

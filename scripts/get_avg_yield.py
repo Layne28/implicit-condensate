@@ -41,9 +41,7 @@ nsubunits = int(([e for e in myfolder.split('/') if e.startswith('N=')][0]).spli
 started = 0
 traj_len = 0
 nsamples = 0
-nseed=10
-print('nseed:', nseed)
-for i in range(nseed):
+for i in range(10):
 
     #Anthony's code won't create traj_12.fsizes if no clusters of that size exist,
     #so need to open traj.sizes and check if there is any assembly >=12
@@ -87,13 +85,13 @@ for i in range(nseed):
         stddevYield += myYieldSq
 
     #print(nsamples)
-    elif os.path.exists(myfolder + ("seed=%d/traj.gsd" % (i+1))):
-        trajfile = myfolder + ("seed=%d/traj.gsd" % (i+1))
-        traj = gsd.hoomd.open(trajfile)
-        traj_len = len(traj)
-        print(len(traj))
-        avgYield = np.zeros(len(traj))
-        stddevYield = np.zeros(len(traj))
+    #elif os.path.exists(myfolder + ("seed=%d/traj.gsd" % (i+1))):
+    #    trajfile = myfolder + ("seed=%d/traj.gsd" % (i+1))
+    #    traj = gsd.hoomd.open(trajfile)
+    #    traj_len = len(traj)
+    #    print(len(traj))
+    #    avgYield = np.zeros(len(traj))
+    #    stddevYield = np.zeros(len(traj))
 
 if nsamples>0:
     avgYield *= 1.0/nsamples

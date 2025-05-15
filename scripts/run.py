@@ -79,7 +79,15 @@ def main():
                         dest="rho",
                         default="2.5")
 
+    parser.add_argument("-is_nonint", "--is_nonint",
+                        help="If =1, turn off all interactions",
+                        type=str,
+                        dest="is_nonint",
+                        default="0")
+
     args = parser.parse_args()
+
+    print(hoomd.version.version)
 
     input_file = os.path.expandvars(args.input_file)
     traj_output_dir = os.path.expandvars(args.traj_output_dir)
@@ -91,6 +99,7 @@ def main():
     rho = float(args.rho)
     sim_time = float(args.sim_time)
     record_time_freq = float(args.record_time_freq)
+    is_nonint = int(args.is_nonint)
 
     #Read seed from file
     seednum = seed
@@ -117,6 +126,13 @@ def main():
     print('volume:', V)
     print('no. subunits:', n_subunits)
     print('condensate radius:', R_cond)
+
+
+    if is_nonint:
+        traj_output_dir += '/is_nonint'
+
+    if record_time_freq < 200.0:
+        traj_output_dir += '/high_freq'
 
     if rho==2.5: #default specificity
         traj_output_dir += '/N=%d/L=%.01f/Vr=%.03f/E_cond=%f/E_bond=%f/gamma_r=%f/seed=%d/' % (n_subunits, L, Vr, E_cond, E_bond, gamma_r, seednum)
@@ -180,12 +196,13 @@ def main():
     morse.params[(full_type_list, full_type_list)] = dict(D0=0, r0=0, alpha=0)
     morse.r_cut[(full_type_list, full_type_list)] = 0
 
-    #set WCA interactions
-    wca.params[("T", "T")] = dict(epsilon=repulsive_eps, sigma=top_sigma)
-    wca.r_cut[("T", "T")] = top_cut
+    if not is_nonint:
+        #set WCA interactions
+        wca.params[("T", "T")] = dict(epsilon=repulsive_eps, sigma=top_sigma)
+        wca.r_cut[("T", "T")] = top_cut
 
-    wca.params[("T", "B")] = dict(epsilon=repulsive_eps, sigma=bot_sigma)
-    wca.r_cut[("T", "B")] = bot_cut
+        wca.params[("T", "B")] = dict(epsilon=repulsive_eps, sigma=bot_sigma)
+        wca.r_cut[("T", "B")] = bot_cut
 
     integrator.forces.append(wca)
 

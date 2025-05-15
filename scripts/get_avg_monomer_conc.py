@@ -18,6 +18,7 @@ nsamples = 0
 for i in range(10):
 
     if os.path.exists(myfolder + ("seed=%d/monomer_conc_traj.txt" % (i+1))):
+        print('seed %d' % (i+1))
         nsamples += 1
         data = np.loadtxt(myfolder + ("seed=%d/monomer_conc_traj.txt" % (i+1)),skiprows=1)
         traj_len = data.shape[0]
@@ -31,15 +32,20 @@ for i in range(10):
             stddevRho1BG = np.zeros(data.shape[0])
             avgRho1C = np.zeros(data.shape[0])
             stddevRho1C = np.zeros(data.shape[0])
+            avgKc = np.zeros(data.shape[0])
+            stddevKc = np.zeros(data.shape[0])
 
         avgRho1BG += myRho1BG
         stddevRho1BG += myRho1BGSq
         avgRho1C += myRho1C
         stddevRho1C += myRho1CSq
+        avgKc += myRho1C/myRho1BG
+        stddevKc += myRho1CSq/myRho1BGSq
 
 if nsamples>0:
     avgRho1BG *= 1.0/nsamples
     avgRho1C *= 1.0/nsamples
+    avgKc *= 1.0/nsamples
     
     stddevRho1BG *= 1.0/nsamples
     stddevRho1BG -= avgRho1BG**2
@@ -49,5 +55,9 @@ if nsamples>0:
     stddevRho1C -= avgRho1C**2
     stddevRho1C = np.sqrt(stddevRho1C)
 
-np.savetxt(myfolder + '/monomer_conc_avg.txt', np.c_[np.arange(traj_len),avgRho1BG,stddevRho1BG,avgRho1C,stddevRho1C], header='No. samples = %d (frame, rho1bg_avg, rho1bg_stddev, rho1c_avg, rho1c_stddev)' % nsamples)
+    stddevKc *= 1.0/nsamples
+    stddevKc -= avgKc**2
+    stddevKc = np.sqrt(stddevKc)
+
+np.savetxt(myfolder + '/monomer_conc_avg.txt', np.c_[np.arange(traj_len),avgRho1BG,stddevRho1BG,avgRho1C,stddevRho1C,avgKc,stddevKc], header='No. samples = %d (frame, rho1bg_avg, rho1bg_stddev, rho1c_avg, rho1c_stddev), Kc_avg, Kc_stddev' % nsamples)
 
