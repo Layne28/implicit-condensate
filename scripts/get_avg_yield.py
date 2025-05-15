@@ -41,7 +41,7 @@ nsubunits = int(([e for e in myfolder.split('/') if e.startswith('N=')][0]).spli
 started = 0
 traj_len = 0
 nsamples = 0
-nseed=4 #CHANGE THIS FOR FINAL RESULTS
+nseed=10
 print('nseed:', nseed)
 for i in range(nseed):
 

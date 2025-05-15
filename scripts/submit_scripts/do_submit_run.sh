@@ -5,16 +5,18 @@ n_run_per_node=12 #4
 script_name="$HOME/capsid-assembly/llps/droplet/scripts/run.py"
 
 nseed=$1
-startseed=5
+startseed=7 #5
 endseed=10
 
 Ns=(1200)
 Ls=(144.2)
 Vrs=(0.005) #(0.005 0.002 0.001)
 #Ebs=(6.5 7.0 7.5 8.0)
-Ebs=(4.0 4.5 5.0 5.5 6.0 6.5 7.0 7.5 8.0)
+#Ebs=(4.0 4.5 5.0 5.5 6.0 6.5 7.0 7.5 8.0)
+Ebs=(8.0)
 #Ecs=(0.0 1.0 3.0 5.0 7.0)
-Ecs=(0.0 3.0 5.0 7.0)
+#Ecs=(0.0 3.0 5.0 7.0)
+Ecs=(3.0)
 
 seeds=($(seq $startseed $endseed))
 

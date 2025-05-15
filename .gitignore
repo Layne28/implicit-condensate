@@ -3,3 +3,4 @@ slurm*.out
 *.fsizes
 *.cl
 *.sizes
+monomer_density*.png

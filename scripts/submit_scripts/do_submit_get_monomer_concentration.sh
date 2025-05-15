@@ -5,6 +5,8 @@ n_run_per_node=64 #4
 script_name="$HOME/capsid-assembly/llps/droplet/scripts/get_monomer_background_conc.py"
 
 nseed=$1
+startseed=5
+endseed=10
 
 Ns=(1200)
 #Ls=(288.5 228.9 181.7 158.7 133.9 117.0 106.3)
@@ -15,7 +17,7 @@ Vrs=(0.005) #(0.005 0.002 0.001)
 Ebs=(4.000000 4.500000 5.000000 5.500000 6.000000 6.500000 7.000000 7.500000 8.000000)
 Ecs=(0.000000 3.000000 5.000000 7.000000)
 
-seeds=($(seq 1 $nseed))
+seeds=($(seq $startseed $endseed))
 
 cmd_list=()
 

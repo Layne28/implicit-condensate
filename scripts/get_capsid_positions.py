@@ -121,7 +121,7 @@ def get_capsid_gr(pos, edges, nbins=400, maxr=40.0):
                 gr[index] += 1
 
     for i in range(r.shape[0]):
-        gr[i] /= 4*np.pi*(i*dr)**2*dr/Vtot
+        gr[i] /= 4*np.pi*(i*dr)**2*dr*N/Vtot
 
     return r, gr
 
